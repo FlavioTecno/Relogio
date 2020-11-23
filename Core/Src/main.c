@@ -16,7 +16,8 @@
   *
   ******************************************************************************
   * Atualização
-  * 23/10/2020 - Implementado relogio com segundpos
+  * 23/11/2020 - Implementado o ajuste das horas e pisca ledcomuns
+  * 23/10/2020 - Implementado relogio com segundos
   * 10/11/2020 - Implementado botões do menu
   ******************************************************************************
   */
@@ -50,9 +51,14 @@ TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
 RTC_TimeTypeDef clkTime;
-RTC_DateTypeDef clkDate;
+RTC_AlarmTypeDef sAlarm;
 
 uint8_t Horas, Minutos, Segundos;
+uint8_t NovaHora, NovaMin, NovoSeg;
+uint8_t AlHora, AlMin, AlSeg;
+uint8_t Bt_AjHora, Bt_AjMin;
+uint8_t BotEsc;
+uint8_t alarmflag = 0;
 
 int Dez_Hora=0, Uni_Hora=0, Dez_Minuto=0, Uni_Minuto=0, Dez_Segundos=0, Uni_Segundos=0;
 
@@ -143,7 +149,7 @@ uint8_t buffer[4];
 int curDigit = 0;
 int cont;
 int testeok;
-int BotSet, BotInc, BotDec;
+int BotAl, BotHora, AjHora, AjMin;
 
 
 void PrintNumber(uint32_t number)
@@ -177,7 +183,7 @@ void PrintNumber(uint32_t number)
 
     // Convert integer to bcd digits
 
-    buffer[6] = 0x80;
+    //buffer[6] = 0x80;
 
     conver = number / 100000;
     buffer[5] = font[conver];
@@ -222,32 +228,103 @@ void PrintRelogio(uint8_t tempo)
 #endif
 }
 
-void MenuRelogio(void){
-	while (BotSet == 0) {
-		buffer[5] = 0x37;
-		buffer[4] = 0x79;
-		buffer[3] = 0X54;
-		buffer[2] = 0X1C;
-		buffer[1] = 0x00;
-		buffer[0] = 0x00;
+void MenuHora(void){
+	//seleciona hora
+	buffer[5] = 0x76;	//H
+	buffer[4] = 0x3F;	//O
+	buffer[3] = 0X00;	//apagado
+	buffer[2] = 0x00;	//apagado
+	buffer[1] = 0x00;	//apagado
+	buffer[0] = 0x00;	//apagado
 
-		BotInc = HAL_GPIO_ReadPin(Bot_Inc_GPIO_Port, Bot_Inc_Pin);
-		if (BotInc == 0){
-			HAL_Delay(20);
-			buffer[6] = 0x80;	//liga leds
-			BotInc = 1;
-			BotSet = 1;
+	NovaHora = 0x00;
+	NovaMin = 0x00;
+
+	while (BotHora == 1)
+	{
+		BotEsc = HAL_GPIO_ReadPin(Bot_Alarme_GPIO_Port, Bot_Alarme_Pin);
+		HAL_Delay(75);
+		if (BotEsc == 0) {
+
+			clkTime.Hours = NovaHora;
+			clkTime.Minutes = NovaMin;
+			clkTime.Seconds = 0x00;
+
+			if(HAL_RTC_SetTime(&hrtc, &clkTime, RTC_FORMAT_BIN) != HAL_OK){
+				Error_Handler();
+			}
+
+			BotHora	= 0;
 		}
 
-		BotDec = HAL_GPIO_ReadPin(Bot_Dec_GPIO_Port, Bot_Dec_Pin);
-		if (BotDec == 0) {
-			HAL_Delay(20);
-			buffer[6] = 0x00;	//desliga leds
-		    BotDec = 1;
-		    BotSet = 1;
+		AjHora = HAL_GPIO_ReadPin(Ajuste_Hora_GPIO_Port, Ajuste_Hora_Pin);
+		HAL_Delay(75);
+		if (AjHora == 0){
+			NovaHora ++;
+			if (NovaHora == 24){
+				NovaHora = 0;
+			}
+			buffer[3] = font[NovaHora / 10];
+			buffer[2] = font[NovaHora % 10];
+
+			AjHora = 1;
+		}
+
+		AjMin = HAL_GPIO_ReadPin(Ajuste_min_GPIO_Port, Ajuste_min_Pin);
+		HAL_Delay(75);
+		if (AjMin == 0) {
+			NovaMin ++;
+			if (NovaMin > 59) {
+				NovaMin = 0;
+			}
+			buffer[1] = font[NovaMin / 10];
+			buffer[0] = font[NovaMin % 10];
+
+			AjMin = 1;
+		}
+
+	}
+}
+
+void MenuAlarme(void){
+	while (BotAl == 1)
+	{
+		//seleciona alarme
+		buffer[5] = 0x77;	//A
+		buffer[4] = 0x38;	//L
+		buffer[3] = 0X00;	//apagado
+		buffer[2] = 0X00;	//apagado
+		buffer[1] = 0x00;	//apagado
+		buffer[0] = 0x00;	//apagado
+
+		AjHora = HAL_GPIO_ReadPin(Ajuste_Hora_GPIO_Port, Ajuste_Hora_Pin);
+		HAL_Delay(150);
+		if (AjHora == 0){
+			AlHora ++;
+			if (AlHora == 24){
+				AlHora = 0;
+			}
+			buffer[4] = font[AlHora / 10];
+			buffer[3] = font[AlHora % 10];
+		}
+
+		AjMin = HAL_GPIO_ReadPin(Ajuste_min_GPIO_Port, Ajuste_min_Pin);
+		HAL_Delay(150);
+		if (AjMin == 0) {
+			AlMin ++;
+			if (AlMin > 59) {
+				AlMin = 0;
+			}
+			buffer[1] = font[AlMin / 10];
+			buffer[0] = font[AlMin % 10];
+		}
+		if (HAL_GPIO_ReadPin(Bot_Alarme_GPIO_Port, Bot_Alarme_Pin) == GPIO_PIN_RESET) {
+			BotAl = 0;
 		}
 	}
 }
+
+
 
 /* USER CODE END 0 */
 
@@ -299,14 +376,10 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	  BotSet = 1;
-	  BotInc = 1;
-	  BotDec = 1;
-
 #if !Relogio
-	  testeok = HAL_GPIO_ReadPin(Teste_GPIO_Port, Teste_Pin);
+	  testeok = HAL_GPIO_ReadPin(Bot_Set_GPIO_Port, Bot_Set_Pin);
 
-	  if (testeok == 1)
+	  if (testeok == 0)
 		  for (cont = 0; cont <= 7; cont++){
 			  GPIOA -> ODR = Segmentos[cont];
 			  HAL_Delay(250);
@@ -319,8 +392,8 @@ int main(void)
 #endif
 			PrintNumber(cont);
 			HAL_Delay(500);
-			testeok = HAL_GPIO_ReadPin(Teste_GPIO_Port, Teste_Pin);
-			if (testeok == 1) break;
+			testeok = HAL_GPIO_ReadPin(Bot_Set_GPIO_Port, Bot_Set_Pin);
+			if (testeok == 0) break;
 		}
 	  }
 
@@ -340,23 +413,38 @@ int main(void)
 
 #else
 
-	  if(HAL_GPIO_ReadPin(Bot_Set_GPIO_Port, Bot_Set_Pin) == GPIO_PIN_RESET){			  //Verifica botao menu
-		  BotSet = 0;
-		  MenuRelogio();
-	  }
-
-
 	  HAL_RTC_GetTime(&hrtc, &clkTime, RTC_FORMAT_BIN);
 
 	  Horas = clkTime.Hours;
 	  Minutos = clkTime.Minutes;
 #if ComSeg
 	  Segundos = clkTime.Seconds;
+	  if (!(Segundos % 2)) {
+		  buffer[6] = 0x80;
+	  }else buffer[6] = 0x00;
+
 	  PrintRelogio(Segundos);
 #endif
 	  PrintRelogio(Minutos);
 	  PrintRelogio(Horas);
 #endif	//relogio
+
+	  //Teste de Alarme
+
+
+	  //Verifica botao Hora
+	  if (HAL_GPIO_ReadPin(Bot_Hora_GPIO_Port, Bot_Hora_Pin) == GPIO_PIN_RESET){
+		  HAL_Delay(125);
+		  BotHora = 1;
+		  MenuHora();
+	  }
+
+	  //verifica botao de Alarme
+	  if (HAL_GPIO_ReadPin(Bot_Alarme_GPIO_Port, Bot_Alarme_Pin) == GPIO_PIN_RESET){
+		  HAL_Delay(125);
+		  BotAl = 1;
+		  MenuAlarme();
+	  }
 
   }		//end while
   /* USER CODE END 3 */
@@ -415,53 +503,37 @@ void SystemClock_Config(void)
   */
 static void MX_RTC_Init(void)
 {
+	/* USER CODE BEGIN RTC_Init 0 */
 
-  /* USER CODE BEGIN RTC_Init 0 */
+	/* USER CODE END RTC_Init 0 */
 
-  /* USER CODE END RTC_Init 0 */
+	/* USER CODE BEGIN RTC_Init 1 */
 
-  RTC_TimeTypeDef sTime = {0};
-  RTC_DateTypeDef DateToUpdate = {0};
+	/* USER CODE END RTC_Init 1 */
+	/** Initialize RTC Only
+	*/
+	hrtc.Instance = RTC;
+	hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
+	hrtc.Init.OutPut = RTC_OUTPUTSOURCE_ALARM;
+	if (HAL_RTC_Init(&hrtc) != HAL_OK)
+	{
+	Error_Handler();
+	}
 
-  /* USER CODE BEGIN RTC_Init 1 */
+	/** Initialize RTC and set the Time and Date
+	*/
+	clkTime.Hours = 0x0;
+	clkTime.Minutes = 0x0;
+	clkTime.Seconds = 0x0;
 
-  /* USER CODE END RTC_Init 1 */
-  /** Initialize RTC Only
-  */
-  hrtc.Instance = RTC;
-  hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
-  hrtc.Init.OutPut = RTC_OUTPUTSOURCE_NONE;
-  if (HAL_RTC_Init(&hrtc) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	if (HAL_RTC_SetTime(&hrtc, &clkTime, RTC_FORMAT_BCD) != HAL_OK)
+	{
+	Error_Handler();
+	}
 
-  /* USER CODE BEGIN Check_RTC_BKUP */
+	  /* USER CODE BEGIN RTC_Init 2 */
 
-  /* USER CODE END Check_RTC_BKUP */
-
-  /** Initialize RTC and set the Time and Date
-  */
-  sTime.Hours = 0x0;
-  sTime.Minutes = 0x0;
-  sTime.Seconds = 0x0;
-
-  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  DateToUpdate.WeekDay = RTC_WEEKDAY_SUNDAY;
-  DateToUpdate.Month = RTC_MONTH_JANUARY;
-  DateToUpdate.Date = 0x1;
-  DateToUpdate.Year = 0x0;
-
-  if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN RTC_Init 2 */
-
-  /* USER CODE END RTC_Init 2 */
+	/* USER CODE END RTC_Init 2 */
 
 }
 
@@ -526,9 +598,6 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(TesteLed_GPIO_Port, TesteLed_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, SEGA_Pin|SEGB_Pin|SEGC_Pin|SEGD_Pin
                           |SEGE_Pin|SEGF_Pin|SEGG_Pin|SEGP_Pin
                           |DIG_6_Pin, GPIO_PIN_RESET);
@@ -536,13 +605,6 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, DIG_1_Pin|DIG_2_Pin|DIG_3_Pin|DIG_4_Pin
                           |DIG_LED_Pin|DIG_5_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : TesteLed_Pin */
-  GPIO_InitStruct.Pin = TesteLed_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(TesteLed_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SEGA_Pin SEGB_Pin SEGC_Pin SEGD_Pin
                            SEGE_Pin SEGF_Pin SEGG_Pin SEGP_Pin
@@ -564,8 +626,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Bot_Set_Pin Bot_Inc_Pin Bot_Dec_Pin */
-  GPIO_InitStruct.Pin = Bot_Set_Pin|Bot_Inc_Pin|Bot_Dec_Pin;
+  /*Configure GPIO pins : Bot_Alarme_Pin Bot_Hora_Pin Ajuste_Hora_Pin Ajuste_min_Pin */
+  GPIO_InitStruct.Pin = Bot_Alarme_Pin|Bot_Hora_Pin|Ajuste_Hora_Pin|Ajuste_min_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);

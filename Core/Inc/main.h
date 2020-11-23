@@ -58,8 +58,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define TesteLed_Pin GPIO_PIN_13
-#define TesteLed_GPIO_Port GPIOC
 #define SEGA_Pin GPIO_PIN_0
 #define SEGA_GPIO_Port GPIOA
 #define SEGB_Pin GPIO_PIN_1
@@ -90,12 +88,14 @@ void Error_Handler(void);
 #define DIG_5_GPIO_Port GPIOB
 #define DIG_6_Pin GPIO_PIN_8
 #define DIG_6_GPIO_Port GPIOA
-#define Bot_Set_Pin GPIO_PIN_11
-#define Bot_Set_GPIO_Port GPIOA
-#define Bot_Inc_Pin GPIO_PIN_12
-#define Bot_Inc_GPIO_Port GPIOA
-#define Bot_Dec_Pin GPIO_PIN_15
-#define Bot_Dec_GPIO_Port GPIOA
+#define Bot_Alarme_Pin GPIO_PIN_10
+#define Bot_Alarme_GPIO_Port GPIOA
+#define Bot_Hora_Pin GPIO_PIN_11
+#define Bot_Hora_GPIO_Port GPIOA
+#define Ajuste_Hora_Pin GPIO_PIN_12
+#define Ajuste_Hora_GPIO_Port GPIOA
+#define Ajuste_min_Pin GPIO_PIN_15
+#define Ajuste_min_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

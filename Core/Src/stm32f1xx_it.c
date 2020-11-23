@@ -38,6 +38,11 @@ extern const uint8_t font[18];
 extern uint8_t buffer[5];
 extern int testeok;
 
+#if ComSeg
+extern unsigned char buffer_diplay;
+#else
+extern unsigned char buffer_diplay[] = { '8', '8', '8', '8', 0x00};
+#endif
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -230,7 +235,12 @@ void TIM2_IRQHandler(void)
 
   static uint8_t digit=0;
 
+
+#if !(Relogio)
+  if (testeok == 0){
+#else
   if (testeok == 1){
+#endif
 	  HAL_GPIO_TogglePin(DIG_LED_GPIO_Port, DIG_LED_Pin);
 	  HAL_GPIO_TogglePin(DIG_1_GPIO_Port, DIG_1_Pin);
 	  HAL_GPIO_TogglePin(DIG_2_GPIO_Port, DIG_2_Pin);
@@ -242,114 +252,113 @@ void TIM2_IRQHandler(void)
 #endif
   }
   else {
+	  	  GPIOA -> ODR = buffer[digit];
 
-	 GPIOA -> ODR = buffer[digit];
-
-		switch(digit){
+	  	  switch(digit){
 #if TipoDisp
-		case 0:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
+		  case 0:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
 #if ComSeg
-			HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
 #endif
-			HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
-			break;
-		case 1:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
+			  break;
+		  case 1:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
 #if ComSeg
-			HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
 #endif
-			HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
-			break;
-		case 2:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
+			  break;
+		  case 2:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
 #if ComSeg
-			HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
 #endif
-			HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
-			break;
-		case 3:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
+			  break;
+		  case 3:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_SET);
 #if ComSeg
-			HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
 #endif
-			HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
-			break;
-		case 4:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
+			  break;
+		  case 4:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
 #if ComSeg
-			HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
 #else
-			HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_SET);
 #endif
-			break;
+			  break;
 #if ComSeg
-		case 5:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
-			break;
-		case 6:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_SET);
-			break;
+		  case 5:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_RESET);
+			  break;
+		  case 6:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_5_GPIO_Port, DIG_5_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_6_GPIO_Port, DIG_6_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_LED_GPIO_Port, DIG_LED_Pin, GPIO_PIN_SET);
+			  break;
 #endif
 
 #else	//anodo comum
-		case 0:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
-			break;
-		case 1:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_SET);
-			break;
-		case 2:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_SET);
-			break;
-		case 3:
-			HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_SET);
-			HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_SET);
-			break;
+		  case 0:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_RESET);
+			  break;
+		  case 1:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_SET);
+			  break;
+		  case 2:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_SET);
+			  break;
+		  case 3:
+			  HAL_GPIO_WritePin(DIG_1_GPIO_Port, DIG_1_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(DIG_2_GPIO_Port, DIG_2_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_3_GPIO_Port, DIG_3_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(DIG_4_GPIO_Port, DIG_4_Pin, GPIO_PIN_SET);
+			  break;
 #endif
 		}
 

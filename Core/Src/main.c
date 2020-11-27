@@ -16,6 +16,7 @@
   *
   ******************************************************************************
   * Atualização
+  * 27/11/2020 - Implementação do ajuste do alarme e led piscando
   * 23/11/2020 - Implementado o ajuste das horas e pisca ledcomuns
   * 23/10/2020 - Implementado relogio com segundos
   * 10/11/2020 - Implementado botões do menu
@@ -242,7 +243,7 @@ void MenuHora(void){
 
 	while (BotHora == 1)
 	{
-		BotEsc = HAL_GPIO_ReadPin(Bot_Alarme_GPIO_Port, Bot_Alarme_Pin);
+		BotEsc = HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin);
 		HAL_Delay(75);
 		if (BotEsc == 0) {
 
@@ -270,7 +271,7 @@ void MenuHora(void){
 			AjHora = 1;
 		}
 
-		AjMin = HAL_GPIO_ReadPin(Ajuste_min_GPIO_Port, Ajuste_min_Pin);
+		AjMin = HAL_GPIO_ReadPin(Ajuste_Min_GPIO_Port, Ajuste_Min_Pin);
 		HAL_Delay(75);
 		if (AjMin == 0) {
 			NovaMin ++;
@@ -287,29 +288,46 @@ void MenuHora(void){
 }
 
 void MenuAlarme(void){
+	//seleciona alarme
+	buffer[5] = 0x77;	//A
+	buffer[4] = 0x38;	//L
+	buffer[3] = 0X00;	//apagado
+	buffer[2] = 0X00;	//apagado
+	buffer[1] = 0x00;	//apagado
+	buffer[0] = 0x00;	//apagado
+
+	AlHora = 0x00;
+	AlMin = 0x00;
+
 	while (BotAl == 1)
 	{
-		//seleciona alarme
-		buffer[5] = 0x77;	//A
-		buffer[4] = 0x38;	//L
-		buffer[3] = 0X00;	//apagado
-		buffer[2] = 0X00;	//apagado
-		buffer[1] = 0x00;	//apagado
-		buffer[0] = 0x00;	//apagado
+		BotEsc = HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin);
+		HAL_Delay(75);
+		if (BotEsc == 0) {
+			sAlarm.AlarmTime.Hours = AlHora;
+			sAlarm.AlarmTime.Minutes = AlMin;
+			sAlarm.AlarmTime.Seconds = 0x00;
+			sAlarm.Alarm = RTC_ALARM_A;
+			if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
+			{
+				Error_Handler();
+			}
+			BotAl = 0;
+		}
 
 		AjHora = HAL_GPIO_ReadPin(Ajuste_Hora_GPIO_Port, Ajuste_Hora_Pin);
-		HAL_Delay(150);
+		HAL_Delay(75);
 		if (AjHora == 0){
 			AlHora ++;
 			if (AlHora == 24){
 				AlHora = 0;
 			}
-			buffer[4] = font[AlHora / 10];
-			buffer[3] = font[AlHora % 10];
+			buffer[3] = font[AlHora / 10];
+			buffer[2] = font[AlHora % 10];
 		}
 
-		AjMin = HAL_GPIO_ReadPin(Ajuste_min_GPIO_Port, Ajuste_min_Pin);
-		HAL_Delay(150);
+		AjMin = HAL_GPIO_ReadPin(Ajuste_Min_GPIO_Port, Ajuste_Min_Pin);
+		HAL_Delay(75);
 		if (AjMin == 0) {
 			AlMin ++;
 			if (AlMin > 59) {
@@ -318,12 +336,25 @@ void MenuAlarme(void){
 			buffer[1] = font[AlMin / 10];
 			buffer[0] = font[AlMin % 10];
 		}
-		if (HAL_GPIO_ReadPin(Bot_Alarme_GPIO_Port, Bot_Alarme_Pin) == GPIO_PIN_RESET) {
-			BotAl = 0;
-		}
 	}
 }
 
+void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
+{
+	alarmflag = 1;
+}
+
+void Alarm_On(void)
+{
+	HAL_GPIO_TogglePin(LedAlarme_GPIO_Port, LedAlarme_Pin);
+	HAL_Delay(250);
+}
+
+void DesAlarm(void)
+{
+	HAL_GPIO_WritePin(LedAlarme_GPIO_Port, LedAlarme_Pin, GPIO_PIN_RESET);
+	alarmflag = 0;
+}
 
 
 /* USER CODE END 0 */
@@ -429,9 +460,6 @@ int main(void)
 	  PrintRelogio(Horas);
 #endif	//relogio
 
-	  //Teste de Alarme
-
-
 	  //Verifica botao Hora
 	  if (HAL_GPIO_ReadPin(Bot_Hora_GPIO_Port, Bot_Hora_Pin) == GPIO_PIN_RESET){
 		  HAL_Delay(125);
@@ -444,6 +472,16 @@ int main(void)
 		  HAL_Delay(125);
 		  BotAl = 1;
 		  MenuAlarme();
+	  }
+
+	  //Teste de Alarme
+	  if (alarmflag)
+	  {
+		  Alarm_On();
+	  }
+
+	  if (HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin) == GPIO_PIN_RESET){
+		  DesAlarm();
 	  }
 
   }		//end while
@@ -503,37 +541,26 @@ void SystemClock_Config(void)
   */
 static void MX_RTC_Init(void)
 {
-	/* USER CODE BEGIN RTC_Init 0 */
 
-	/* USER CODE END RTC_Init 0 */
+  /* USER CODE BEGIN RTC_Init 0 */
 
-	/* USER CODE BEGIN RTC_Init 1 */
+  /* USER CODE END RTC_Init 0 */
 
-	/* USER CODE END RTC_Init 1 */
-	/** Initialize RTC Only
-	*/
-	hrtc.Instance = RTC;
-	hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
-	hrtc.Init.OutPut = RTC_OUTPUTSOURCE_ALARM;
-	if (HAL_RTC_Init(&hrtc) != HAL_OK)
-	{
-	Error_Handler();
-	}
+  /* USER CODE BEGIN RTC_Init 1 */
 
-	/** Initialize RTC and set the Time and Date
-	*/
-	clkTime.Hours = 0x0;
-	clkTime.Minutes = 0x0;
-	clkTime.Seconds = 0x0;
+  /* USER CODE END RTC_Init 1 */
+  /** Initialize RTC Only
+  */
+  hrtc.Instance = RTC;
+  hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
+  hrtc.Init.OutPut = RTC_OUTPUTSOURCE_ALARM;
+  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RTC_Init 2 */
 
-	if (HAL_RTC_SetTime(&hrtc, &clkTime, RTC_FORMAT_BCD) != HAL_OK)
-	{
-	Error_Handler();
-	}
-
-	  /* USER CODE BEGIN RTC_Init 2 */
-
-	/* USER CODE END RTC_Init 2 */
+  /* USER CODE END RTC_Init 2 */
 
 }
 
@@ -604,7 +631,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, DIG_1_Pin|DIG_2_Pin|DIG_3_Pin|DIG_4_Pin
-                          |DIG_LED_Pin|DIG_5_Pin, GPIO_PIN_RESET);
+                          |DIG_LED_Pin|DIG_5_Pin|LedAlarme_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SEGA_Pin SEGB_Pin SEGC_Pin SEGD_Pin
                            SEGE_Pin SEGF_Pin SEGG_Pin SEGP_Pin
@@ -618,16 +645,18 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DIG_1_Pin DIG_2_Pin DIG_3_Pin DIG_4_Pin
-                           DIG_LED_Pin DIG_5_Pin */
+                           DIG_LED_Pin DIG_5_Pin LedAlarme_Pin */
   GPIO_InitStruct.Pin = DIG_1_Pin|DIG_2_Pin|DIG_3_Pin|DIG_4_Pin
-                          |DIG_LED_Pin|DIG_5_Pin;
+                          |DIG_LED_Pin|DIG_5_Pin|LedAlarme_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Bot_Alarme_Pin Bot_Hora_Pin Ajuste_Hora_Pin Ajuste_min_Pin */
-  GPIO_InitStruct.Pin = Bot_Alarme_Pin|Bot_Hora_Pin|Ajuste_Hora_Pin|Ajuste_min_Pin;
+  /*Configure GPIO pins : Bot_Esc_Pin Bot_Alarme_Pin Bot_Hora_Pin Ajuste_Hora_Pin
+                           Ajuste_Min_Pin */
+  GPIO_InitStruct.Pin = Bot_Esc_Pin|Bot_Alarme_Pin|Bot_Hora_Pin|Ajuste_Hora_Pin
+                          |Ajuste_Min_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);

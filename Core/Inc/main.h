@@ -88,14 +88,18 @@ void Error_Handler(void);
 #define DIG_5_GPIO_Port GPIOB
 #define DIG_6_Pin GPIO_PIN_8
 #define DIG_6_GPIO_Port GPIOA
+#define Bot_Esc_Pin GPIO_PIN_9
+#define Bot_Esc_GPIO_Port GPIOA
 #define Bot_Alarme_Pin GPIO_PIN_10
 #define Bot_Alarme_GPIO_Port GPIOA
 #define Bot_Hora_Pin GPIO_PIN_11
 #define Bot_Hora_GPIO_Port GPIOA
 #define Ajuste_Hora_Pin GPIO_PIN_12
 #define Ajuste_Hora_GPIO_Port GPIOA
-#define Ajuste_min_Pin GPIO_PIN_15
-#define Ajuste_min_GPIO_Port GPIOA
+#define Ajuste_Min_Pin GPIO_PIN_15
+#define Ajuste_Min_GPIO_Port GPIOA
+#define LedAlarme_Pin GPIO_PIN_9
+#define LedAlarme_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

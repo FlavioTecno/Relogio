@@ -16,6 +16,8 @@
   *
   ******************************************************************************
   * Atualização
+  * 03/12/2020 - Implementado Modulo de Rele
+  * 28/11/2020 - Implemeentado Buzzer de Alarme
   * 27/11/2020 - Implementação do ajuste do alarme e led piscando
   * 23/11/2020 - Implementado o ajuste das horas e pisca ledcomuns
   * 23/10/2020 - Implementado relogio com segundos
@@ -313,6 +315,7 @@ void MenuAlarme(void){
 				Error_Handler();
 			}
 			BotAl = 0;
+			HAL_GPIO_WritePin(LedAlarme_GPIO_Port, LedAlarme_Pin, GPIO_PIN_SET);
 		}
 
 		AjHora = HAL_GPIO_ReadPin(Ajuste_Hora_GPIO_Port, Ajuste_Hora_Pin);
@@ -346,13 +349,15 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 
 void Alarm_On(void)
 {
-	HAL_GPIO_TogglePin(LedAlarme_GPIO_Port, LedAlarme_Pin);
-	HAL_Delay(250);
+	HAL_GPIO_WritePin(BuzAlarme_GPIO_Port, BuzAlarme_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LampAlarme_GPIO_Port, LampAlarme_Pin, GPIO_PIN_SET);
 }
 
-void DesAlarm(void)
+void Alarm_Off(void)
 {
+	HAL_GPIO_WritePin(BuzAlarme_GPIO_Port, BuzAlarme_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LedAlarme_GPIO_Port, LedAlarme_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LampAlarme_GPIO_Port, LampAlarme_Pin, GPIO_PIN_RESET);
 	alarmflag = 0;
 }
 
@@ -444,6 +449,16 @@ int main(void)
 
 #else
 
+	  //Alarme
+	  if (alarmflag)
+	  {
+		  Alarm_On();
+	  }
+
+	  if (HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin) == GPIO_PIN_RESET){
+		  Alarm_Off();
+	  }
+
 	  HAL_RTC_GetTime(&hrtc, &clkTime, RTC_FORMAT_BIN);
 
 	  Horas = clkTime.Hours;
@@ -474,15 +489,6 @@ int main(void)
 		  MenuAlarme();
 	  }
 
-	  //Teste de Alarme
-	  if (alarmflag)
-	  {
-		  Alarm_On();
-	  }
-
-	  if (HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin) == GPIO_PIN_RESET){
-		  DesAlarm();
-	  }
 
   }		//end while
   /* USER CODE END 3 */
@@ -631,7 +637,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, DIG_1_Pin|DIG_2_Pin|DIG_3_Pin|DIG_4_Pin
-                          |DIG_LED_Pin|DIG_5_Pin|LedAlarme_Pin, GPIO_PIN_RESET);
+                          |DIG_LED_Pin|DIG_5_Pin|BuzAlarme_Pin|LampAlarme_Pin
+                          |LedAlarme_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SEGA_Pin SEGB_Pin SEGC_Pin SEGD_Pin
                            SEGE_Pin SEGF_Pin SEGG_Pin SEGP_Pin
@@ -660,6 +667,20 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : BuzAlarme_Pin */
+  GPIO_InitStruct.Pin = BuzAlarme_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(BuzAlarme_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LampAlarme_Pin */
+  GPIO_InitStruct.Pin = LampAlarme_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LampAlarme_GPIO_Port, &GPIO_InitStruct);
 
 }
 

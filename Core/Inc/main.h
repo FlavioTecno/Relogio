@@ -98,6 +98,10 @@ void Error_Handler(void);
 #define Ajuste_Hora_GPIO_Port GPIOA
 #define Ajuste_Min_Pin GPIO_PIN_15
 #define Ajuste_Min_GPIO_Port GPIOA
+#define BuzAlarme_Pin GPIO_PIN_3
+#define BuzAlarme_GPIO_Port GPIOB
+#define LampAlarme_Pin GPIO_PIN_4
+#define LampAlarme_GPIO_Port GPIOB
 #define LedAlarme_Pin GPIO_PIN_9
 #define LedAlarme_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

@@ -50,6 +50,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -102,6 +104,8 @@ void Error_Handler(void);
 #define BuzAlarme_GPIO_Port GPIOB
 #define LampAlarme_Pin GPIO_PIN_4
 #define LampAlarme_GPIO_Port GPIOB
+#define MotorAl_Pin GPIO_PIN_6
+#define MotorAl_GPIO_Port GPIOB
 #define LedAlarme_Pin GPIO_PIN_9
 #define LedAlarme_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

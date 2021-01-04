@@ -16,6 +16,7 @@
   *
   ******************************************************************************
   * Atualização
+  * 04/01/2021 - Incluido Chave para Ajuste da Hora e Alarme
   * 03/12/2020 - Implementado Modulo de Rele
   * 28/11/2020 - Implemeentado Buzzer de Alarme
   * 27/11/2020 - Implementação do ajuste do alarme e led piscando
@@ -51,6 +52,8 @@
 RTC_HandleTypeDef hrtc;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
 RTC_TimeTypeDef clkTime;
@@ -72,6 +75,10 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_RTC_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_TIM3_Init(void);
+static void MX_TIM4_Init(void);
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -101,8 +108,7 @@ Segmento p - Conectado pino 7 do 595
 
 Sequencia do byte: A B C D E F G p
 
-Essa codifica vai de 0 a 9. Mas varias letras
-pode ser desenhadas, assim como outros caracteres  básicos
+Essa codifica vai de 0 a 9. Mas varias letras pode ser desenhadas, assim como outros caracteres  básicos
 ------------------------------------------------------------*/
 
 const unsigned char font[22] =
@@ -243,11 +249,12 @@ void MenuHora(void){
 	NovaHora = 0x00;
 	NovaMin = 0x00;
 
-	while (BotHora == 1)
+	while (BotHora == 0)
 	{
-		BotEsc = HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin);
+		BotHora = HAL_GPIO_ReadPin(Bot_Hora_GPIO_Port, Bot_Hora_Pin);
+//		BotEsc = HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin);
 		HAL_Delay(75);
-		if (BotEsc == 0) {
+		if (BotHora == 1) {
 
 			clkTime.Hours = NovaHora;
 			clkTime.Minutes = NovaMin;
@@ -257,7 +264,7 @@ void MenuHora(void){
 				Error_Handler();
 			}
 
-			BotHora	= 0;
+//			BotHora	= 0;
 		}
 
 		AjHora = HAL_GPIO_ReadPin(Ajuste_Hora_GPIO_Port, Ajuste_Hora_Pin);
@@ -301,11 +308,12 @@ void MenuAlarme(void){
 	AlHora = 0x00;
 	AlMin = 0x00;
 
-	while (BotAl == 1)
+	while (BotAl == 0)
 	{
-		BotEsc = HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin);
-		HAL_Delay(75);
-		if (BotEsc == 0) {
+		BotAl = HAL_GPIO_ReadPin(Bot_Alarme_GPIO_Port, Bot_Alarme_Pin);
+//		BotEsc = HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin);
+ 		HAL_Delay(75);
+		if (BotAl == 1) {
 			sAlarm.AlarmTime.Hours = AlHora;
 			sAlarm.AlarmTime.Minutes = AlMin;
 			sAlarm.AlarmTime.Seconds = 0x00;
@@ -314,7 +322,7 @@ void MenuAlarme(void){
 			{
 				Error_Handler();
 			}
-			BotAl = 0;
+//			BotAl = 0;
 			HAL_GPIO_WritePin(LedAlarme_GPIO_Port, LedAlarme_Pin, GPIO_PIN_SET);
 		}
 
@@ -394,6 +402,8 @@ int main(void)
   MX_GPIO_Init();
   MX_RTC_Init();
   MX_TIM2_Init();
+  MX_TIM3_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
   //inicializa timer 2
@@ -401,6 +411,10 @@ int main(void)
 
   HAL_RTC_Init(&hrtc);
   HAL_RTCEx_SetSecond_IT(&hrtc);
+
+  //inicializa timer 4
+  HAL_TIM_Base_Start(&htim4);
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);		//start sinal PWMno pino PB6
 
   /* USER CODE END 2 */
 
@@ -478,14 +492,14 @@ int main(void)
 	  //Verifica botao Hora
 	  if (HAL_GPIO_ReadPin(Bot_Hora_GPIO_Port, Bot_Hora_Pin) == GPIO_PIN_RESET){
 		  HAL_Delay(125);
-		  BotHora = 1;
+		  BotHora = 0;
 		  MenuHora();
 	  }
 
 	  //verifica botao de Alarme
 	  if (HAL_GPIO_ReadPin(Bot_Alarme_GPIO_Port, Bot_Alarme_Pin) == GPIO_PIN_RESET){
 		  HAL_Delay(125);
-		  BotAl = 1;
+		  BotAl = 0;
 		  MenuAlarme();
 	  }
 
@@ -612,6 +626,100 @@ static void MX_TIM2_Init(void)
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 0;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 65535;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+
+}
+
+/**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM4_Init(void)
+{
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+	TIM_MasterConfigTypeDef sMasterConfig = {0};
+	TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 15;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 3906;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+ // htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 1953;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
+  HAL_TIM_MspPostInit(&htim4);
 
 }
 

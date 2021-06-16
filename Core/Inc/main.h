@@ -50,8 +50,6 @@ extern "C" {
 
 /* USER CODE END EM */
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -90,24 +88,26 @@ void Error_Handler(void);
 #define DIG_5_GPIO_Port GPIOB
 #define DIG_6_Pin GPIO_PIN_8
 #define DIG_6_GPIO_Port GPIOA
-#define Bot_Esc_Pin GPIO_PIN_9
-#define Bot_Esc_GPIO_Port GPIOA
-#define Bot_Alarme_Pin GPIO_PIN_10
-#define Bot_Alarme_GPIO_Port GPIOA
-#define Bot_Hora_Pin GPIO_PIN_11
-#define Bot_Hora_GPIO_Port GPIOA
-#define Ajuste_Hora_Pin GPIO_PIN_12
-#define Ajuste_Hora_GPIO_Port GPIOA
-#define Ajuste_Min_Pin GPIO_PIN_15
-#define Ajuste_Min_GPIO_Port GPIOA
-#define BuzAlarme_Pin GPIO_PIN_3
-#define BuzAlarme_GPIO_Port GPIOB
-#define LampAlarme_Pin GPIO_PIN_4
-#define LampAlarme_GPIO_Port GPIOB
-#define MotorAl_Pin GPIO_PIN_6
-#define MotorAl_GPIO_Port GPIOB
-#define LedAlarme_Pin GPIO_PIN_9
-#define LedAlarme_GPIO_Port GPIOB
+#define BUZAL_Pin GPIO_PIN_9
+#define BUZAL_GPIO_Port GPIOA
+#define LEDAL_Pin GPIO_PIN_10
+#define LEDAL_GPIO_Port GPIOA
+#define CH_HORA_Pin GPIO_PIN_11
+#define CH_HORA_GPIO_Port GPIOA
+#define CH_AL_Pin GPIO_PIN_12
+#define CH_AL_GPIO_Port GPIOA
+#define ALON_Pin GPIO_PIN_15
+#define ALON_GPIO_Port GPIOA
+#define BTUP_Pin GPIO_PIN_3
+#define BTUP_GPIO_Port GPIOB
+#define BTDOWN_Pin GPIO_PIN_4
+#define BTDOWN_GPIO_Port GPIOB
+#define BTESC_Pin GPIO_PIN_6
+#define BTESC_GPIO_Port GPIOB
+#define BTSET_Pin GPIO_PIN_7
+#define BTSET_GPIO_Port GPIOB
+#define LAMPAL_Pin GPIO_PIN_8
+#define LAMPAL_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

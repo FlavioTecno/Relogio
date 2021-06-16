@@ -38,11 +38,8 @@ extern const uint8_t font[18];
 extern uint8_t buffer[5];
 extern int testeok;
 
-#if ComSeg
 extern unsigned char buffer_diplay;
-#else
-extern unsigned char buffer_diplay[] = { '8', '8', '8', '8', 0x00};
-#endif
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -235,7 +232,6 @@ void TIM2_IRQHandler(void)
 
   static uint8_t digit=0;
 
-
 #if !(Relogio)
   if (testeok == 0){
 #else
@@ -252,7 +248,8 @@ void TIM2_IRQHandler(void)
 #endif
   }
   else {
-	  	  GPIOA -> ODR = buffer[digit];
+
+  GPIOA -> ODR = buffer[digit];
 
 	  	  switch(digit){
 #if TipoDisp

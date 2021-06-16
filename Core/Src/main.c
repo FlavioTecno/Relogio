@@ -52,8 +52,6 @@
 RTC_HandleTypeDef hrtc;
 
 TIM_HandleTypeDef htim2;
-TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
 RTC_TimeTypeDef clkTime;
@@ -62,8 +60,6 @@ RTC_AlarmTypeDef sAlarm;
 uint8_t Horas, Minutos, Segundos;
 uint8_t NovaHora, NovaMin, NovoSeg;
 uint8_t AlHora, AlMin, AlSeg;
-uint8_t Bt_AjHora, Bt_AjMin;
-uint8_t BotEsc;
 uint8_t alarmflag = 0;
 
 int Dez_Hora=0, Uni_Hora=0, Dez_Minuto=0, Uni_Minuto=0, Dez_Segundos=0, Uni_Segundos=0;
@@ -75,10 +71,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_RTC_Init(void);
 static void MX_TIM2_Init(void);
-static void MX_TIM3_Init(void);
-static void MX_TIM4_Init(void);
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -87,7 +79,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 /* USER CODE BEGIN 0 */
 
 /*----------------------------------------------------------
-Configura��o do display de 7 segmentos e pinos de conex�o
+Configuração do display de 7 segmentos e pinos de conexão
      A
     ----
   F|    |B
@@ -113,99 +105,99 @@ Essa codifica vai de 0 a 9. Mas varias letras pode ser desenhadas, assim como ou
 
 const unsigned char font[22] =
 {
-	0x3F,    /* 0 */
-	0x06,    /* 1 */
-	0x5B,    /* 2 */
-	0x4F,    /* 3 */
-	0x66,    /* 4 */
-	0x6D,    /* 5 */
-	0x7D,    /* 6 */
-	0x07,    /* 7 */
-	0x7F,    /* 8 */
-	0x6F,    /* 9 */
-	0x77,    /* A */
-	0x7C,    /* B */
-	0x39,    /* C */
-	0x5E,    /* D */
-	0x79,    /* E */
-	0x71,    /* F */
-	0x37,	/* M */
-	0x39,	/* E */
-	0x54,	/* N */
-	0x1C,	/* U */
-	0X80,	/* Ponto */
-	0x00	/* Apagado */
+		0x3F,    /* 0 */
+		0x06,    /* 1 */
+		0x5B,    /* 2 */
+		0x4F,    /* 3 */
+		0x66,    /* 4 */
+		0x6D,    /* 5 */
+		0x7D,    /* 6 */
+		0x07,    /* 7 */
+		0x7F,    /* 8 */
+		0x6F,    /* 9 */
+		0x77,    /* A */
+		0x7C,    /* B */
+		0x39,    /* C */
+		0x5E,    /* D */
+		0x79,    /* E */
+		0x71,    /* F */
+		0x37,	/* M */
+		0x39,	/* E */
+		0x54,	/* N */
+		0x1C,	/* U */
+		0X80,	/* Ponto */
+		0x00	/* Apagado */
 };
 
 const uint8_t Segmentos[8]=
 {
-	0x01,	//seg A
-	0x02,	//seg B
-	0x04,	//seg C
-	0x08,	//seg D
-	0x10,	//seg E
-	0x20,	//seg F
-	0x40,	//seg G
-	0x80	//seg P
+		0x01,	//seg A
+		0x02,	//seg B
+		0x04,	//seg C
+		0x08,	//seg D
+		0x10,	//seg E
+		0x20,	//seg F
+		0x40,	//seg G
+		0x80	//seg P
 };
 
 #if ComSeg
 uint8_t buffer[7];
 #else
-uint8_t buffer[4];
+uint8_t buffer[5];
 #endif
+int mostra;
 
 int curDigit = 0;
-int cont;
 int testeok;
-int BotAl, BotHora, AjHora, AjMin;
-
+int Set_Hora, Set_Min, CH_HORA, CH_AL, ALON, BTUP, BTDOWN, BTESC, BTSET;
+int DspPisca;
 
 void PrintNumber(uint32_t number)
 {
 	int conver;
 #if !ComSeg
-    // Check max and min
-    if (number > 9999)
-    {
-        number = 9999;
-    }
+	// Check max and min
+	if (number > 9999)
+	{
+		number = 9999;
+	}
 
-    // Convert integer to bcd digits
+	// Convert integer to bcd digits
 
-    buffer[4] = 0x80;
+	//buffer[4] = 0x80;
 
-    conver = number / 1000;
-    buffer[3] = font[conver];
-    conver = number % 1000/100;
-    buffer[2] = font[conver];
-    conver = number % 100/10;
-    buffer[1] = font[conver];
-    conver = number % 10;
-    buffer[0] = font[conver];
+	conver = number / 1000;
+	buffer[3] = font[conver];
+	conver = number % 1000/100;
+	buffer[2] = font[conver];
+	conver = number % 100/10;
+	buffer[1] = font[conver];
+	conver = number % 10;
+	buffer[0] = font[conver];
 #else
-    // Check max and min
-    if (number > 999999)
-    {
-        number = 999999;
-    }
+	// Check max and min
+	if (number > 999999)
+	{
+		number = 999999;
+	}
 
-    // Convert integer to bcd digits
+	// Convert integer to bcd digits
 
-    //buffer[6] = 0x80;
+	//buffer[6] = 0x80;
 
-    conver = number / 100000;
-    buffer[5] = font[conver];
-    conver = number % 100000/10000;
-    buffer[4] = font[conver];
-    conver = number % 10000/1000;
-    buffer[3] = font[conver];
-    conver = number % 1000/100;
-    buffer[2] = font[conver];
-    conver = number % 100/10;
-    buffer[1] = font[conver];
-    conver = number % 10;
-    buffer[0] = font[conver];
+	conver = number / 100000;
+	buffer[5] = font[conver];
+	conver = number % 100000/10000;
+	buffer[4] = font[conver];
+	conver = number % 10000/1000;
+	buffer[3] = font[conver];
+	conver = number % 1000/100;
+	buffer[2] = font[conver];
+	conver = number % 100/10;
+	buffer[1] = font[conver];
+	conver = number % 10;
+	buffer[0] = font[conver];
 #endif
 }	//end PrintNumber
 
@@ -241,20 +233,21 @@ void MenuHora(void){
 	//seleciona hora
 	buffer[5] = 0x76;	//H
 	buffer[4] = 0x3F;	//O
-	buffer[3] = 0X00;	//apagado
-	buffer[2] = 0x00;	//apagado
-	buffer[1] = 0x00;	//apagado
-	buffer[0] = 0x00;	//apagado
 
-	NovaHora = 0x00;
-	NovaMin = 0x00;
+	//testando hora
+	NovaHora = clkTime.Hours;
+	NovaMin = clkTime.Minutes;
 
-	while (BotHora == 0)
+	buffer[3] = font[NovaHora / 10];
+	buffer[2] = font[NovaHora % 10];
+	buffer[1] = font[NovaMin / 10];
+	buffer[0] = font[NovaMin % 10];
+
+	while (CH_HORA == 0)
 	{
-		BotHora = HAL_GPIO_ReadPin(Bot_Hora_GPIO_Port, Bot_Hora_Pin);
-//		BotEsc = HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin);
+		CH_HORA = HAL_GPIO_ReadPin(CH_HORA_GPIO_Port, CH_HORA_Pin);
 		HAL_Delay(75);
-		if (BotHora == 1) {
+		if (CH_HORA == 1) {
 
 			clkTime.Hours = NovaHora;
 			clkTime.Minutes = NovaMin;
@@ -263,89 +256,210 @@ void MenuHora(void){
 			if(HAL_RTC_SetTime(&hrtc, &clkTime, RTC_FORMAT_BIN) != HAL_OK){
 				Error_Handler();
 			}
-
-//			BotHora	= 0;
+			break;
 		}
 
-		AjHora = HAL_GPIO_ReadPin(Ajuste_Hora_GPIO_Port, Ajuste_Hora_Pin);
-		HAL_Delay(75);
-		if (AjHora == 0){
-			NovaHora ++;
-			if (NovaHora == 24){
-				NovaHora = 0;
+		//acerta hora
+		Set_Hora = 1;
+		DspPisca = 1;
+		while (Set_Hora){
+			BTUP = HAL_GPIO_ReadPin(BTUP_GPIO_Port, BTUP_Pin);
+			HAL_Delay(75);
+			if (BTUP == 0){
+				NovaHora ++;
+				if (NovaHora == 24){
+					NovaHora = 0;
+				}
+				BTUP = 1;
 			}
-			buffer[3] = font[NovaHora / 10];
-			buffer[2] = font[NovaHora % 10];
 
-			AjHora = 1;
-		}
-
-		AjMin = HAL_GPIO_ReadPin(Ajuste_Min_GPIO_Port, Ajuste_Min_Pin);
-		HAL_Delay(75);
-		if (AjMin == 0) {
-			NovaMin ++;
-			if (NovaMin > 59) {
-				NovaMin = 0;
+			BTDOWN = HAL_GPIO_ReadPin(BTDOWN_GPIO_Port, BTDOWN_Pin);
+			HAL_Delay(75);
+			if (BTDOWN == 0) {
+				NovaHora --;
+				if (NovaHora == 0) {
+					NovaHora = 24;
+				}
+				BTDOWN = 1;
 			}
-			buffer[1] = font[NovaMin / 10];
-			buffer[0] = font[NovaMin % 10];
 
-			AjMin = 1;
+			if (DspPisca) {
+				buffer[3] = font[NovaHora / 10];
+				buffer[2] = font[NovaHora % 10];
+				HAL_Delay(25);
+				DspPisca = 0;
+			} else {
+				buffer[3] = 0x00;	//Apagado
+				buffer[2] = 0x00;	//Apagado
+				HAL_Delay(25);
+				DspPisca = 1;
+			}
+
+			BTSET = HAL_GPIO_ReadPin(BTSET_GPIO_Port, BTSET_Pin);
+			HAL_Delay(75);
+			if (!BTSET) {
+				Set_Hora = 0;
+			}
 		}
 
+		// acerta minuto
+		Set_Min = 1;
+		DspPisca = 1;
+		while (Set_Min){
+			BTUP = HAL_GPIO_ReadPin(BTUP_GPIO_Port, BTUP_Pin);
+			HAL_Delay(75);
+			if (BTUP == 0){
+				NovaMin ++;
+				if (NovaMin == 59){
+					NovaMin = 0;
+				}
+				BTUP = 1;
+			}
+
+			BTDOWN = HAL_GPIO_ReadPin(BTDOWN_GPIO_Port, BTDOWN_Pin);
+			HAL_Delay(75);
+			if (BTDOWN == 0) {
+				NovaMin --;
+				if (NovaMin == 0) {
+					NovaMin = 59;
+				}
+				BTDOWN = 1;
+			}
+
+			if (DspPisca) {
+				buffer[1] = font[NovaMin / 10];
+				buffer[0] = font[NovaMin % 10];
+				HAL_Delay(50);
+				DspPisca = 0;
+			} else {
+				buffer[1] = 0x00;		//Apagado
+				buffer[0] = 0x00;		//Apagado
+				HAL_Delay(50);
+				DspPisca = 1;
+			}
+
+			BTSET = HAL_GPIO_ReadPin(BTSET_GPIO_Port, BTSET_Pin);
+			HAL_Delay(75);
+			if (!BTSET) {
+				Set_Min = 0;
+			}
+		}
 	}
 }
 
 void MenuAlarme(void){
 	//seleciona alarme
-	buffer[5] = 0x77;	//A
-	buffer[4] = 0x38;	//L
-	buffer[3] = 0X00;	//apagado
-	buffer[2] = 0X00;	//apagado
-	buffer[1] = 0x00;	//apagado
-	buffer[0] = 0x00;	//apagado
+	buffer[5] = 0x77;	//mostra letra A
+	buffer[4] = 0x38;	//mostra letra L
 
-	AlHora = 0x00;
-	AlMin = 0x00;
+	//testando alarme
+	AlHora = sAlarm.AlarmTime.Hours;
+	AlMin = sAlarm.AlarmTime.Minutes;
 
-	while (BotAl == 0)
+	buffer[3] = font[AlHora / 10];
+	buffer[2] = font[AlHora % 10];
+	buffer[1] = font[AlMin / 10];
+	buffer[0] = font[AlMin % 10];
+
+	while (CH_AL == 0)
 	{
-		BotAl = HAL_GPIO_ReadPin(Bot_Alarme_GPIO_Port, Bot_Alarme_Pin);
-//		BotEsc = HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin);
- 		HAL_Delay(75);
-		if (BotAl == 1) {
+		CH_AL = HAL_GPIO_ReadPin(CH_AL_GPIO_Port, CH_AL_Pin);
+		HAL_Delay(75);
+		if (CH_AL == 1) {
 			sAlarm.AlarmTime.Hours = AlHora;
 			sAlarm.AlarmTime.Minutes = AlMin;
 			sAlarm.AlarmTime.Seconds = 0x00;
 			sAlarm.Alarm = RTC_ALARM_A;
-			if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
-			{
+			if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK){
 				Error_Handler();
 			}
-//			BotAl = 0;
-			HAL_GPIO_WritePin(LedAlarme_GPIO_Port, LedAlarme_Pin, GPIO_PIN_SET);
+			break;
 		}
 
-		AjHora = HAL_GPIO_ReadPin(Ajuste_Hora_GPIO_Port, Ajuste_Hora_Pin);
-		HAL_Delay(75);
-		if (AjHora == 0){
-			AlHora ++;
-			if (AlHora == 24){
-				AlHora = 0;
+		//acerta hora do alarme
+		Set_Hora = 1;
+		DspPisca = 1;
+		while (Set_Hora){
+			BTUP = HAL_GPIO_ReadPin(BTUP_GPIO_Port, BTUP_Pin);
+			HAL_Delay(75);
+			if (BTUP == 0){
+				AlHora ++;
+				if (AlHora == 24){
+					AlHora = 0;
+				}
+				BTUP = 1;
 			}
-			buffer[3] = font[AlHora / 10];
-			buffer[2] = font[AlHora % 10];
+
+			BTDOWN = HAL_GPIO_ReadPin(BTDOWN_GPIO_Port, BTDOWN_Pin);
+			HAL_Delay(75);
+			if (BTDOWN == 0){
+				AlHora --;
+				if (AlHora == 0){
+					AlHora = 24;
+				}
+				BTDOWN = 1;
+			}
+
+			if (DspPisca){
+				buffer[3] = font[AlHora / 10];
+				buffer[2] = font[AlHora % 10];
+				HAL_Delay(50);
+				DspPisca = 0;
+			} else {
+				buffer[3] = 0x00;		//apaga display
+				buffer[2] = 0x00;
+				HAL_Delay(50);
+				DspPisca = 1;
+			}
+
+			BTSET = HAL_GPIO_ReadPin(BTSET_GPIO_Port, BTSET_Pin);
+			HAL_Delay(75);
+			if (!BTSET){
+				Set_Hora = 0;
+			}
 		}
 
-		AjMin = HAL_GPIO_ReadPin(Ajuste_Min_GPIO_Port, Ajuste_Min_Pin);
-		HAL_Delay(75);
-		if (AjMin == 0) {
-			AlMin ++;
-			if (AlMin > 59) {
-				AlMin = 0;
+		//acerta minuto do alarme
+		Set_Min = 1;
+		DspPisca = 1;
+		while (Set_Min){
+			BTUP = HAL_GPIO_ReadPin(BTUP_GPIO_Port, BTUP_Pin);
+			HAL_Delay(75);
+			if (BTUP == 0){
+				AlMin ++;
+				if (AlMin == 59){
+					AlMin = 0;
+				}
+				BTUP = 1;
 			}
-			buffer[1] = font[AlMin / 10];
-			buffer[0] = font[AlMin % 10];
+
+			BTDOWN = HAL_GPIO_ReadPin(BTDOWN_GPIO_Port, BTDOWN_Pin);
+			HAL_Delay(75);
+			if (BTDOWN == 0){
+				AlMin --;
+				if (AlMin == 0){
+					AlMin = 59;
+				}
+				BTDOWN = 1;
+			}
+
+			if(DspPisca){
+				buffer[1] = font[AlMin / 10];
+				buffer[0] = font[AlMin % 10];
+				HAL_Delay(50);
+				DspPisca = 0;
+			} else {
+				buffer[1] = 0x00;		//apaga display
+				buffer[0] = 0x00;
+				HAL_Delay(50);
+				DspPisca = 1;
+			}
+
+			BTSET = HAL_GPIO_ReadPin(BTSET_GPIO_Port, BTSET_Pin);
+			HAL_Delay(75);
+			if (!BTSET) {
+				Set_Min = 0;
+			}
 		}
 	}
 }
@@ -357,15 +471,15 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 
 void Alarm_On(void)
 {
-	HAL_GPIO_WritePin(BuzAlarme_GPIO_Port, BuzAlarme_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LampAlarme_GPIO_Port, LampAlarme_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(BUZAL_GPIO_Port, BUZAL_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LAMPAL_GPIO_Port, LAMPAL_Pin, GPIO_PIN_SET);
 }
 
 void Alarm_Off(void)
 {
-	HAL_GPIO_WritePin(BuzAlarme_GPIO_Port, BuzAlarme_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(LedAlarme_GPIO_Port, LedAlarme_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(LampAlarme_GPIO_Port, LampAlarme_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(BUZAL_GPIO_Port, BUZAL_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LEDAL_GPIO_Port, LEDAL_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LAMPAL_GPIO_Port, LAMPAL_Pin, GPIO_PIN_RESET);
 	alarmflag = 0;
 }
 
@@ -402,49 +516,44 @@ int main(void)
   MX_GPIO_Init();
   MX_RTC_Init();
   MX_TIM2_Init();
-  MX_TIM3_Init();
-  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
-  //inicializa timer 2
-  HAL_TIM_Base_Start_IT(&htim2);
+	//inicializa timer 2
+	HAL_TIM_Base_Start_IT(&htim2);
 
-  HAL_RTC_Init(&hrtc);
-  HAL_RTCEx_SetSecond_IT(&hrtc);
+	HAL_RTC_Init(&hrtc);
+	HAL_RTCEx_SetSecond_IT(&hrtc);
 
-  //inicializa timer 4
-  HAL_TIM_Base_Start(&htim4);
-  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);		//start sinal PWMno pino PB6
+	//inicializa timer 4
+	//HAL_TIM_Base_Start(&htim4);
+	//HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);		//start sinal PWMno pino PB6
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
   {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-
 #if !Relogio
-	  testeok = HAL_GPIO_ReadPin(Bot_Set_GPIO_Port, Bot_Set_Pin);
+	  int cont;
 
-	  if (testeok == 0)
-		  for (cont = 0; cont <= 7; cont++){
-			  GPIOA -> ODR = Segmentos[cont];
-			  HAL_Delay(250);
-		  }
-	  else {
-#if !ComSeg
-		for (cont = 0; cont < 10000; cont++) {
-#else
-		for (cont = 0; cont < 100000; cont++){
-#endif
-			PrintNumber(cont);
-			HAL_Delay(500);
-			testeok = HAL_GPIO_ReadPin(Bot_Set_GPIO_Port, Bot_Set_Pin);
-			if (testeok == 0) break;
-		}
+	  //	  testeok = HAL_GPIO_ReadPin(CHALON_GPIO_Port, CHALON_Pin);
+
+	  //	  if (testeok == 0){
+	  for (cont = 0; cont <= 7; cont++){
+		  GPIOA -> ODR = Segmentos[cont];
+		  HAL_Delay(500);
+	  } //for seg
+	  //	  }
+
+	  testeok = 1;
+
+	  for (cont = 0; cont < 990000; cont=cont+555) {
+		  PrintNumber(cont);
+		  HAL_Delay(50);
+		  //			testeok = HAL_GPIO_ReadPin(BTSET_GPIO_Port, BTSET_Pin);
+		  //			if (testeok == 0) break;
 	  }
 
 #if !ComSeg
@@ -453,28 +562,19 @@ int main(void)
 
 	  PrintNumber(7520);
 	  HAL_Delay(500);
+
 #else
-	  PrintNumber(524778);
+	  PrintNumber(123456);
 	  HAL_Delay(500);
 
-	  PrintNumber(343074);
+	  PrintNumber(789012);
 	  HAL_Delay(500);
 #endif
+	  testeok = 0;
 
 #else
 
-	  //Alarme
-	  if (alarmflag)
-	  {
-		  Alarm_On();
-	  }
-
-	  if (HAL_GPIO_ReadPin(Bot_Esc_GPIO_Port, Bot_Esc_Pin) == GPIO_PIN_RESET){
-		  Alarm_Off();
-	  }
-
 	  HAL_RTC_GetTime(&hrtc, &clkTime, RTC_FORMAT_BIN);
-
 	  Horas = clkTime.Hours;
 	  Minutos = clkTime.Minutes;
 #if ComSeg
@@ -482,29 +582,49 @@ int main(void)
 	  if (!(Segundos % 2)) {
 		  buffer[6] = 0x80;
 	  }else buffer[6] = 0x00;
-
 	  PrintRelogio(Segundos);
 #endif
 	  PrintRelogio(Minutos);
 	  PrintRelogio(Horas);
-#endif	//relogio
 
 	  //Verifica botao Hora
-	  if (HAL_GPIO_ReadPin(Bot_Hora_GPIO_Port, Bot_Hora_Pin) == GPIO_PIN_RESET){
+	  if (HAL_GPIO_ReadPin(CH_HORA_GPIO_Port, CH_HORA_Pin) == GPIO_PIN_RESET){
 		  HAL_Delay(125);
-		  BotHora = 0;
+		  CH_HORA = 0;
 		  MenuHora();
 	  }
 
 	  //verifica botao de Alarme
-	  if (HAL_GPIO_ReadPin(Bot_Alarme_GPIO_Port, Bot_Alarme_Pin) == GPIO_PIN_RESET){
+	  if (HAL_GPIO_ReadPin(CH_AL_GPIO_Port, CH_AL_Pin) == GPIO_PIN_RESET){
 		  HAL_Delay(125);
-		  BotAl = 0;
+		  CH_AL = 0;
 		  MenuAlarme();
 	  }
 
+	  //Alarme ligado
+	  ALON = HAL_GPIO_ReadPin(ALON_GPIO_Port, ALON_Pin);
+	  if (ALON == 0){
+		  HAL_GPIO_WritePin(LEDAL_GPIO_Port, LEDAL_Pin, GPIO_PIN_SET);		//Led Alarme Ativado
+	  } else {
+		  HAL_GPIO_WritePin(LEDAL_GPIO_Port, LEDAL_Pin, GPIO_PIN_RESET);	//Led Alarme Desativado
+	  }
 
-  }		//end while
+	  if (alarmflag){
+		  if (ALON == 0){
+			  Alarm_On();
+		  }
+	  }
+
+	  if (HAL_GPIO_ReadPin(BTESC_GPIO_Port, BTESC_Pin) == GPIO_PIN_RESET){
+		  Alarm_Off();
+	  }
+#endif	//relogio
+
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+
   /* USER CODE END 3 */
 }
 
@@ -566,6 +686,9 @@ static void MX_RTC_Init(void)
 
   /* USER CODE END RTC_Init 0 */
 
+  RTC_TimeTypeDef sTime = {0};
+  RTC_DateTypeDef DateToUpdate = {0};
+
   /* USER CODE BEGIN RTC_Init 1 */
 
   /* USER CODE END RTC_Init 1 */
@@ -575,6 +698,30 @@ static void MX_RTC_Init(void)
   hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
   hrtc.Init.OutPut = RTC_OUTPUTSOURCE_ALARM;
   if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* USER CODE BEGIN Check_RTC_BKUP */
+
+  /* USER CODE END Check_RTC_BKUP */
+
+  /** Initialize RTC and set the Time and Date
+  */
+  sTime.Hours = 0x0;
+  sTime.Minutes = 0x0;
+  sTime.Seconds = 0x0;
+
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  DateToUpdate.WeekDay = RTC_WEEKDAY_MONDAY;
+  DateToUpdate.Month = RTC_MONTH_JANUARY;
+  DateToUpdate.Date = 0x1;
+  DateToUpdate.Year = 0x0;
+
+  if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
@@ -630,100 +777,6 @@ static void MX_TIM2_Init(void)
 }
 
 /**
-  * @brief TIM3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM3_Init(void)
-{
-
-  /* USER CODE BEGIN TIM3_Init 0 */
-
-  /* USER CODE END TIM3_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM3_Init 1 */
-
-  /* USER CODE END TIM3_Init 1 */
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM3_Init 2 */
-
-  /* USER CODE END TIM3_Init 2 */
-
-}
-
-/**
-  * @brief TIM4 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM4_Init(void)
-{
-
-  /* USER CODE BEGIN TIM4_Init 0 */
-
-  /* USER CODE END TIM4_Init 0 */
-
-	TIM_MasterConfigTypeDef sMasterConfig = {0};
-	TIM_OC_InitTypeDef sConfigOC = {0};
-
-  /* USER CODE BEGIN TIM4_Init 1 */
-
-  /* USER CODE END TIM4_Init 1 */
-  htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 15;
-  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 3906;
-  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
- // htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 1953;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM4_Init 2 */
-
-  /* USER CODE END TIM4_Init 2 */
-  HAL_TIM_MspPostInit(&htim4);
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -741,54 +794,50 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, SEGA_Pin|SEGB_Pin|SEGC_Pin|SEGD_Pin
                           |SEGE_Pin|SEGF_Pin|SEGG_Pin|SEGP_Pin
-                          |DIG_6_Pin, GPIO_PIN_RESET);
+                          |DIG_6_Pin|BUZAL_Pin|LEDAL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, DIG_1_Pin|DIG_2_Pin|DIG_3_Pin|DIG_4_Pin
-                          |DIG_LED_Pin|DIG_5_Pin|BuzAlarme_Pin|LampAlarme_Pin
-                          |LedAlarme_Pin, GPIO_PIN_RESET);
+                          |DIG_LED_Pin|DIG_5_Pin|LAMPAL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SEGA_Pin SEGB_Pin SEGC_Pin SEGD_Pin
                            SEGE_Pin SEGF_Pin SEGG_Pin SEGP_Pin
-                           DIG_6_Pin */
+                           DIG_6_Pin BUZAL_Pin */
   GPIO_InitStruct.Pin = SEGA_Pin|SEGB_Pin|SEGC_Pin|SEGD_Pin
                           |SEGE_Pin|SEGF_Pin|SEGG_Pin|SEGP_Pin
-                          |DIG_6_Pin;
+                          |DIG_6_Pin|BUZAL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DIG_1_Pin DIG_2_Pin DIG_3_Pin DIG_4_Pin
-                           DIG_LED_Pin DIG_5_Pin LedAlarme_Pin */
+                           DIG_LED_Pin DIG_5_Pin LAMPAL_Pin */
   GPIO_InitStruct.Pin = DIG_1_Pin|DIG_2_Pin|DIG_3_Pin|DIG_4_Pin
-                          |DIG_LED_Pin|DIG_5_Pin|LedAlarme_Pin;
+                          |DIG_LED_Pin|DIG_5_Pin|LAMPAL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Bot_Esc_Pin Bot_Alarme_Pin Bot_Hora_Pin Ajuste_Hora_Pin
-                           Ajuste_Min_Pin */
-  GPIO_InitStruct.Pin = Bot_Esc_Pin|Bot_Alarme_Pin|Bot_Hora_Pin|Ajuste_Hora_Pin
-                          |Ajuste_Min_Pin;
+  /*Configure GPIO pin : LEDAL_Pin */
+  GPIO_InitStruct.Pin = LEDAL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LEDAL_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : CH_HORA_Pin CH_AL_Pin ALON_Pin */
+  GPIO_InitStruct.Pin = CH_HORA_Pin|CH_AL_Pin|ALON_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : BuzAlarme_Pin */
-  GPIO_InitStruct.Pin = BuzAlarme_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(BuzAlarme_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : LampAlarme_Pin */
-  GPIO_InitStruct.Pin = LampAlarme_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  /*Configure GPIO pins : BTUP_Pin BTDOWN_Pin BTESC_Pin BTSET_Pin */
+  GPIO_InitStruct.Pin = BTUP_Pin|BTDOWN_Pin|BTESC_Pin|BTSET_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LampAlarme_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 

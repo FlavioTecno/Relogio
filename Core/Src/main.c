@@ -277,8 +277,8 @@ void MenuHora(void){
 			HAL_Delay(75);
 			if (BTDOWN == 0) {
 				NovaHora --;
-				if (NovaHora == 0) {
-					NovaHora = 24;
+				if (NovaHora == 0 || NovaHora == 255) {
+					NovaHora = 23;
 				}
 				BTDOWN = 1;
 			}
@@ -320,7 +320,7 @@ void MenuHora(void){
 			HAL_Delay(75);
 			if (BTDOWN == 0) {
 				NovaMin --;
-				if (NovaMin == 0) {
+				if (NovaMin == 0 || NovaMin == 255) {
 					NovaMin = 59;
 				}
 				BTDOWN = 1;
@@ -394,8 +394,8 @@ void MenuAlarme(void){
 			HAL_Delay(75);
 			if (BTDOWN == 0){
 				AlHora --;
-				if (AlHora == 0){
-					AlHora = 24;
+				if (AlHora == 0 || AlHora == 255){
+					AlHora = 23;
 				}
 				BTDOWN = 1;
 			}
@@ -437,7 +437,7 @@ void MenuAlarme(void){
 			HAL_Delay(75);
 			if (BTDOWN == 0){
 				AlMin --;
-				if (AlMin == 0){
+				if (AlMin == 0 || AlMin == 255){
 					AlMin = 59;
 				}
 				BTDOWN = 1;

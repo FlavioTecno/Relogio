@@ -15,7 +15,12 @@
   *                        opensource.org/licenses/BSD-3-Clause
   *
   ******************************************************************************
+  * Projeto: Relogio para Surdos
+  *
+  * Programador: Jose Flavio Lyra Zampini
+  *
   * Atualização
+  * 05/08/2021 - Incluido Motor Vibracall
   * 04/01/2021 - Incluido Chave para Ajuste da Hora e Alarme
   * 03/12/2020 - Implementado Modulo de Rele
   * 28/11/2020 - Implemeentado Buzzer de Alarme
@@ -473,13 +478,14 @@ void Alarm_On(void)
 {
 	HAL_GPIO_WritePin(BUZAL_GPIO_Port, BUZAL_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LAMPAL_GPIO_Port, LAMPAL_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(MOTORAL_GPIO_Port, MOTORAL_Pin, GPIO_PIN_SET);
 }
 
 void Alarm_Off(void)
 {
 	HAL_GPIO_WritePin(BUZAL_GPIO_Port, BUZAL_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(LEDAL_GPIO_Port, LEDAL_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LAMPAL_GPIO_Port, LAMPAL_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MOTORAL_GPIO_Port, MOTORAL_Pin, GPIO_PIN_RESET);
 	alarmflag = 0;
 }
 
@@ -686,9 +692,6 @@ static void MX_RTC_Init(void)
 
   /* USER CODE END RTC_Init 0 */
 
-  RTC_TimeTypeDef sTime = {0};
-  RTC_DateTypeDef DateToUpdate = {0};
-
   /* USER CODE BEGIN RTC_Init 1 */
 
   /* USER CODE END RTC_Init 1 */
@@ -698,30 +701,6 @@ static void MX_RTC_Init(void)
   hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
   hrtc.Init.OutPut = RTC_OUTPUTSOURCE_ALARM;
   if (HAL_RTC_Init(&hrtc) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /* USER CODE BEGIN Check_RTC_BKUP */
-
-  /* USER CODE END Check_RTC_BKUP */
-
-  /** Initialize RTC and set the Time and Date
-  */
-  sTime.Hours = 0x0;
-  sTime.Minutes = 0x0;
-  sTime.Seconds = 0x0;
-
-  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  DateToUpdate.WeekDay = RTC_WEEKDAY_MONDAY;
-  DateToUpdate.Month = RTC_MONTH_JANUARY;
-  DateToUpdate.Date = 0x1;
-  DateToUpdate.Year = 0x0;
-
-  if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
@@ -798,7 +777,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, DIG_1_Pin|DIG_2_Pin|DIG_3_Pin|DIG_4_Pin
-                          |DIG_LED_Pin|DIG_5_Pin|LAMPAL_Pin, GPIO_PIN_RESET);
+                          |DIG_LED_Pin|DIG_5_Pin|LAMPAL_Pin|MOTORAL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SEGA_Pin SEGB_Pin SEGC_Pin SEGD_Pin
                            SEGE_Pin SEGF_Pin SEGG_Pin SEGP_Pin
@@ -812,9 +791,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DIG_1_Pin DIG_2_Pin DIG_3_Pin DIG_4_Pin
-                           DIG_LED_Pin DIG_5_Pin LAMPAL_Pin */
+                           DIG_LED_Pin DIG_5_Pin LAMPAL_Pin MOTORAL_Pin */
   GPIO_InitStruct.Pin = DIG_1_Pin|DIG_2_Pin|DIG_3_Pin|DIG_4_Pin
-                          |DIG_LED_Pin|DIG_5_Pin|LAMPAL_Pin;
+                          |DIG_LED_Pin|DIG_5_Pin|LAMPAL_Pin|MOTORAL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

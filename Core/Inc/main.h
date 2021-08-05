@@ -108,6 +108,8 @@ void Error_Handler(void);
 #define BTSET_GPIO_Port GPIOB
 #define LAMPAL_Pin GPIO_PIN_8
 #define LAMPAL_GPIO_Port GPIOB
+#define MOTORAL_Pin GPIO_PIN_9
+#define MOTORAL_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

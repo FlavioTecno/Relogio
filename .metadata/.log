@@ -13,3 +13,87 @@ Command-line arguments:  -os win32 -ws win32 -arch x86_64
 
 !ENTRY org.eclipse.core.jobs 2 2 2021-06-08 12:07:34.198
 !MESSAGE Job found still running after platform shutdown.  Jobs should be canceled by the plugin that scheduled them during shutdown: org.eclipse.ui.internal.Workbench$40
+!SESSION 2021-08-05 15:34:52.142 -----------------------------------------------
+eclipse.buildId=Version 1.7.0
+java.version=11.0.10
+java.vendor=AdoptOpenJDK
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=pt_BR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2021-08-05 15:35:40.231
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2021-08-05 15:35:40.309
+!MESSAGE Log4j initialized with config file C:\Trabalho\MyProjects\Relogio\.metadata\.log4j.xml
+
+!ENTRY org.eclipse.e4.ui.workbench 2 0 2021-08-05 15:35:43.949
+!MESSAGE Removing PartDescriptorImpl with the "org.eclipse.rse.shells.ui.view.commandsView" id and the "Remote Shell" label.It points to the non available "bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" class. Bundle might have been uninstalled
+
+!ENTRY org.eclipse.e4.ui.workbench 2 0 2021-08-05 15:35:43.949
+!MESSAGE Removing PartDescriptorImpl with the "org.eclipse.rse.ui.view.systemView" id and the "Remote Systems" label.It points to the non available "bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" class. Bundle might have been uninstalled
+
+!ENTRY org.eclipse.e4.ui.workbench 2 0 2021-08-05 15:35:43.949
+!MESSAGE Removing PartDescriptorImpl with the "org.eclipse.rse.ui.view.teamView" id and the "Team" label.It points to the non available "bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" class. Bundle might have been uninstalled
+
+!ENTRY org.eclipse.e4.ui.workbench 2 0 2021-08-05 15:35:43.949
+!MESSAGE Removing PartDescriptorImpl with the "org.eclipse.rse.ui.view.systemTableView" id and the "Remote System Details" label.It points to the non available "bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" class. Bundle might have been uninstalled
+
+!ENTRY org.eclipse.e4.ui.workbench 2 0 2021-08-05 15:35:43.949
+!MESSAGE Removing PartDescriptorImpl with the "org.eclipse.rse.ui.view.SystemSearchView" id and the "Remote Search" label.It points to the non available "bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" class. Bundle might have been uninstalled
+
+!ENTRY org.eclipse.e4.ui.workbench 2 0 2021-08-05 15:35:43.949
+!MESSAGE Removing PartDescriptorImpl with the "org.eclipse.rse.ui.view.scratchpad.SystemScratchpadViewPart" id and the "Remote Scratchpad" label.It points to the non available "bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" class. Bundle might have been uninstalled
+
+!ENTRY org.eclipse.e4.ui.workbench 2 0 2021-08-05 15:35:43.949
+!MESSAGE Removing PartDescriptorImpl with the "org.eclipse.rse.ui.view.monitorView" id and the "Remote Monitor" label.It points to the non available "bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" class. Bundle might have been uninstalled
+
+!ENTRY org.eclipse.urischeme 4 0 2021-08-05 15:35:44.355
+!MESSAGE Unable to set registry value. Key=Software\Classes\eclipse+command\shell\open\command, name=null, value="C:\ST\STM32CubeIDE_1.7.0\STM32CubeIDE\stm32cubeide.exe" "%1"
+!STACK 0
+org.eclipse.urischeme.internal.registration.WinRegistryException: Unable to set registry value. Key=Software\Classes\eclipse+command\shell\open\command, name=null, value="C:\ST\STM32CubeIDE_1.7.0\STM32CubeIDE\stm32cubeide.exe" "%1"
+	at org.eclipse.urischeme.internal.registration.WinRegistry.setValueForKey(WinRegistry.java:35)
+	at org.eclipse.urischeme.internal.registration.RegistryWriter.addScheme(RegistryWriter.java:62)
+	at org.eclipse.urischeme.internal.registration.RegistrationWindows.handleSchemes(RegistrationWindows.java:63)
+	at org.eclipse.urischeme.AutoRegisterSchemeHandlersJob.run(AutoRegisterSchemeHandlersJob.java:94)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+Caused by: com.sun.jna.platform.win32.Win32Exception: Acesso negado.
+	at com.sun.jna.platform.win32.Advapi32Util.registrySetStringValue(Advapi32Util.java:1556)
+	at com.sun.jna.platform.win32.Advapi32Util.registrySetStringValue(Advapi32Util.java:1601)
+	at com.sun.jna.platform.win32.Advapi32Util.registrySetStringValue(Advapi32Util.java:1574)
+	at org.eclipse.urischeme.internal.registration.WinRegistry.setValueForKey(WinRegistry.java:33)
+	... 4 more
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2021-08-05 15:35:46.121
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2021-08-05 15:36:41.244 -----------------------------------------------
+eclipse.buildId=Version 1.7.0
+java.version=11.0.10
+java.vendor=AdoptOpenJDK
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=pt_BR
+Framework arguments:  C:\Trabalho\MyProjects\Relogio\.project
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 C:\Trabalho\MyProjects\Relogio\.project
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2021-08-05 15:36:49.330
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2021-08-05 15:36:49.393
+!MESSAGE Log4j initialized with config file C:\Trabalho\MyProjects\Relogio\.metadata\.log4j.xml
+
+!ENTRY org.eclipse.urischeme 4 0 2021-08-05 15:36:52.283
+!MESSAGE Unable to set registry value. Key=Software\Classes\eclipse+command\shell\open\command, name=null, value="C:\ST\STM32CubeIDE_1.7.0\STM32CubeIDE\stm32cubeide.exe" "%1"
+!STACK 0
+org.eclipse.urischeme.internal.registration.WinRegistryException: Unable to set registry value. Key=Software\Classes\eclipse+command\shell\open\command, name=null, value="C:\ST\STM32CubeIDE_1.7.0\STM32CubeIDE\stm32cubeide.exe" "%1"
+	at org.eclipse.urischeme.internal.registration.WinRegistry.setValueForKey(WinRegistry.java:35)
+	at org.eclipse.urischeme.internal.registration.RegistryWriter.addScheme(RegistryWriter.java:62)
+	at org.eclipse.urischeme.internal.registration.RegistrationWindows.handleSchemes(RegistrationWindows.java:63)
+	at org.eclipse.urischeme.AutoRegisterSchemeHandlersJob.run(AutoRegisterSchemeHandlersJob.java:94)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+Caused by: com.sun.jna.platform.win32.Win32Exception: Acesso negado.
+	at com.sun.jna.platform.win32.Advapi32Util.registrySetStringValue(Advapi32Util.java:1556)
+	at com.sun.jna.platform.win32.Advapi32Util.registrySetStringValue(Advapi32Util.java:1601)
+	at com.sun.jna.platform.win32.Advapi32Util.registrySetStringValue(Advapi32Util.java:1574)
+	at org.eclipse.urischeme.internal.registration.WinRegistry.setValueForKey(WinRegistry.java:33)
+	... 4 more
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2021-08-05 15:36:53.955
+!MESSAGE Started RMI Server, listening on port 41337
